@@ -13,7 +13,7 @@
   <Project Path="ESP32S3Example/ESP32S3Example.csproj" />
   <Project Path="ESP32S3LVGLExample/ESP32S3LVGLExample.csproj" />
   <Project Path="LVGLXAMLGenerator/LVGLXAMLGenerator.csproj" DisplayName="LVGLXAMLGenerator" />
-  <Project Path="IL2LLVM/IL2LLVM.csproj" />
+  <Project Path="MSIL2LLVM/MSIL2LLVM.csproj" />
   <Project Path="LinuxKernelModuleExample/LinuxKernelModuleExample.csproj" Id="48722b83-b692-40cb-aa11-ad45acbc7936" />
   <Project Path="Validations/Validations.shproj" Id="df7abefe-502f-4cb7-b288-46743d1110d2" />
 </Solution>

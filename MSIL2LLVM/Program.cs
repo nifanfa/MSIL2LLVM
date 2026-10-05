@@ -10,7 +10,7 @@ var buildTimestamp = typeof(Program).Assembly
     .Single(attribute => attribute.Key == "BuildTimestamp")
     .Value;
 
-Console.WriteLine($"IL2LLVM version {buildTimestamp}");
+Console.WriteLine($"MSIL2LLVM version {buildTimestamp}");
 Console.WriteLine("Managed IL to LLVM object-file translator.");
 Console.WriteLine("Copyright (c) nifanfa (nifanfa@nifanfa.com)");
 Console.WriteLine("Translates assemblies built with the custom CoreLib into native object files.");

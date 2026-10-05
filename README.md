@@ -1,8 +1,8 @@
-# IL2LLVM
+# MSIL2LLVM
 
 ![Logo](Logo.svg)
 
-IL2LLVM translates a managed assembly built with this repository's CoreLib into a native object file through LLVM. It is not a .NET runtime, NativeAOT frontend, or a general-purpose replacement for the .NET SDK.
+MSIL2LLVM translates a managed assembly built with this repository's CoreLib into a native object file through LLVM. It is not a .NET runtime, NativeAOT frontend, or a general-purpose replacement for the .NET SDK.
 
 Best practice: https://github.com/nifanfa/BootTo.NET  
 
@@ -16,7 +16,7 @@ Best practice: https://github.com/nifanfa/BootTo.NET
 
 ## Project purpose
 
-The purpose of this project is to support any processor architecture for which LLVM can emit an object file. IL2LLVM does not contain x86, ARM, Windows, Linux, or kernel-specific translation logic. The project supplies the LLVM target triple and the native host supplies the ABI-dependent entry point, exception transfer, and linker configuration.
+The purpose of this project is to support any processor architecture for which LLVM can emit an object file. MSIL2LLVM does not contain x86, ARM, Windows, Linux, or kernel-specific translation logic. The project supplies the LLVM target triple and the native host supplies the ABI-dependent entry point, exception transfer, and linker configuration.
 
 The managed runtime is deliberately small. A user-mode host only needs a small ISO C library surface:
 
@@ -44,7 +44,7 @@ C# project + CoreLib
  managed assembly
         |
         v
-     IL2LLVM
+     MSIL2LLVM
         |
         v
  native object file + host runtime
@@ -57,7 +57,7 @@ C# project + CoreLib
 
 | Path | Purpose |
 | --- | --- |
-| `IL2LLVM/` | The IL-to-LLVM translator. |
+| `MSIL2LLVM/` | The IL-to-LLVM translator. |
 | `CoreLib/` | Shared custom CoreLib compiled into managed input assemblies. |
 | `ConsoleAppExample/` | Managed test program, including language-feature and GC validation. |
 | `apphost/` | Minimal C entry point and host implementations for the console test. |
@@ -66,23 +66,23 @@ C# project + CoreLib
 ## Build requirements
 
 - .NET 10 SDK
-- Local LLVMSharp and Mono.Cecil assemblies under `IL2LLVM/lib/`; building IL2LLVM does not require their NuGet packages. The LVGL XAML generator still restores Roslyn from NuGet.
+- Local LLVMSharp and Mono.Cecil assemblies under `MSIL2LLVM/lib/`; building MSIL2LLVM does not require their NuGet packages. The LVGL XAML generator still restores Roslyn from NuGet.
 - A native linker and host runtime appropriate for the output target
 - For `LinuxKernelModuleExample`: GCC, make, and Linux headers matching the kernel that will load the module
 
 Build the translator:
 
 ```powershell
-dotnet restore IL2LLVM\IL2LLVM.csproj
-dotnet build IL2LLVM\IL2LLVM.csproj --no-restore
+dotnet restore MSIL2LLVM\MSIL2LLVM.csproj
+dotnet build MSIL2LLVM\MSIL2LLVM.csproj --no-restore
 ```
 
-## IL2LLVM invocation
+## MSIL2LLVM invocation
 
-IL2LLVM requires exactly three arguments:
+MSIL2LLVM requires exactly three arguments:
 
 ```text
-IL2LLVM <input-assembly> <output-file> <target>[;<code-model>[;<cpu>[;<features>]]]
+MSIL2LLVM <input-assembly> <output-file> <target>[;<code-model>[;<cpu>[;<features>]]]
 ```
 
 `target` is an LLVM target triple. The optional code model is one of `default`, `tiny`, `small`, `kernel`, `medium`, or `large`. CPU defaults to `generic`; target features use LLVM's comma-separated `+feature,-feature` syntax.
@@ -90,18 +90,18 @@ IL2LLVM <input-assembly> <output-file> <target>[;<code-model>[;<cpu>[;<features>
 Examples:
 
 ```powershell
-IL2LLVM\bin\Debug\net10.0\IL2LLVM.exe `
+MSIL2LLVM\bin\Debug\net10.0\MSIL2LLVM.exe `
   ConsoleAppExample\bin\Debug\net10.0\ConsoleAppExample.dll `
   ConsoleAppExample\bin\Debug\net10.0\ConsoleAppExample.obj `
   x86_64-pc-windows-msvc
 
-IL2LLVM\bin\Debug\net10.0\IL2LLVM.exe `
+MSIL2LLVM\bin\Debug\net10.0\MSIL2LLVM.exe `
   LinuxKernelModuleExample\bin\Debug\net10.0\LinuxKernelModuleExample.dll `
   LinuxKernelModuleExample\bin\Debug\net10.0\LinuxKernelModuleExample.obj `
   "x86_64-unknown-linux-gnu;kernel"
 ```
 
-The second argument is the native output path. IL2LLVM removes unreachable
+The second argument is the native output path. MSIL2LLVM removes unreachable
 method definitions in memory before translation without writing a trimmed assembly. Entry points,
 `[RuntimeExport]` methods, CoreLib runtime hooks, required attribute constructors, and
 potential virtual/interface implementations are preserved. This is a conservative
@@ -117,17 +117,17 @@ the translator for managed static fields, GC descriptors, field data, and
 compiler-generated helpers use internal linkage. Managed entry points and
 `[DllImport("*")]` imports remain external symbols for the host linker.
 
-The Windows build uses the repository's `IL2LLVM/lib/win-x64/libLLVM.dll`.
+The Windows build uses the repository's `MSIL2LLVM/lib/win-x64/libLLVM.dll`.
 It is built from [nifanfa/llvm-project](https://github.com/nifanfa/llvm-project),
 based on LLVM 21.1.8 with the experimental Xtensa backend enabled in addition
 to the regular LLVM targets. Build details and licensing are in
-`IL2LLVM/lib/win-x64/README.md`.
+`MSIL2LLVM/lib/win-x64/README.md`.
 
 ### Calling convention
 
-IL2LLVM emits all generated calls using the C `cdecl` calling convention. This applies to calls across the managed/native boundary as well as calls to host runtime symbols. The host runtime must therefore expose matching `cdecl` entry points; IL2LLVM does not automatically select or adapt platform-specific calling conventions.
+MSIL2LLVM emits all generated calls using the C `cdecl` calling convention. This applies to calls across the managed/native boundary as well as calls to host runtime symbols. The host runtime must therefore expose matching `cdecl` entry points; MSIL2LLVM does not automatically select or adapt platform-specific calling conventions.
 
-The Visual Studio launch profiles in `IL2LLVM/Properties/launchSettings.json` provide the same commands for the console x86/x64 objects and the Linux x86-64 kernel object.
+The Visual Studio launch profiles in `MSIL2LLVM/Properties/launchSettings.json` provide the same commands for the console x86/x64 objects and the Linux x86-64 kernel object.
 
 ## Custom runtime boundary
 
@@ -138,17 +138,17 @@ Platform-specific operations remain external. Methods marked with `[DllImport("*
 
 ### Reuse native libraries
 
-Prefer C# for application logic and interop with existing C/C++ libraries for hardware drivers, graphics, networking, and other platform-specific facilities. IL2LLVM is not intended to replace the C/C++ ecosystem: rewriting mature drivers in C# usually adds maintenance work without improving the application. The ESP32-S3 LVGL example follows this approach by using native LVGL and Arduino display/touch libraries while keeping the UI logic in C#.
+Prefer C# for application logic and interop with existing C/C++ libraries for hardware drivers, graphics, networking, and other platform-specific facilities. MSIL2LLVM is not intended to replace the C/C++ ecosystem: rewriting mature drivers in C# usually adds maintenance work without improving the application. The ESP32-S3 LVGL example follows this approach by using native LVGL and Arduino display/touch libraries while keeping the UI logic in C#.
 
 Import a library's C ABI with `[DllImport("*")]`; for a C++-only API, expose a small `extern "C"` wrapper rather than depending on a compiler-specific C++ ABI. Link the generated object with the native libraries and provide only the bindings your application needs. Keep the native argument and callback rules below in mind when defining that boundary.
 
 ### Native arguments and callbacks
 
-Unlike CLR P/Invoke, IL2LLVM does not marshal managed `string` or array arguments into native character or element pointers. A `[DllImport("*")]` signature must describe the actual native ABI; passing a `string` or `T[]` directly passes a managed object reference, not its contents. Use the `ByReference<T>` implicit conversions in `CoreLib` to pass a pointer to the first element instead: `string` converts to `ByReference<char>` (UTF-16 characters), and `T[]` converts to `ByReference<T>`. For example, the `Console.WriteLine(ByReference<char>)` import accepts a string through that conversion. Match the native character width, provide a length when needed, and note that empty strings or arrays convert to a null reference. Arrays currently reserve one zero-filled element beyond their logical length, but pass an explicit length or construct a properly terminated native buffer rather than relying on that implementation detail. Keep the underlying managed data alive for the duration of the native call.
+Unlike CLR P/Invoke, MSIL2LLVM does not marshal managed `string` or array arguments into native character or element pointers. A `[DllImport("*")]` signature must describe the actual native ABI; passing a `string` or `T[]` directly passes a managed object reference, not its contents. Use the `ByReference<T>` implicit conversions in `CoreLib` to pass a pointer to the first element instead: `string` converts to `ByReference<char>` (UTF-16 characters), and `T[]` converts to `ByReference<T>`. For example, the `Console.WriteLine(ByReference<char>)` import accepts a string through that conversion. Match the native character width, provide a length when needed, and note that empty strings or arrays convert to a null reference. Arrays currently reserve one zero-filled element beyond their logical length, but pass an explicit length or construct a properly terminated native buffer rather than relying on that implementation detail. Keep the underlying managed data alive for the duration of the native call.
 
 Do not pass a managed `Delegate` object or its raw function pointer directly as an unmanaged callback. Delegate invocation supplies the bound target (`this`) as a leading argument, but a native caller does not supply that argument automatically; even static-method delegate thunks use this internal calling shape. The resulting signature mismatch is unsafe. Use a callback with a matching unmanaged function-pointer signature (such as a suitable static `delegate* unmanaged<...>` entry point), or write an explicit native/managed trampoline that passes the target context and manages its lifetime. Native callbacks must also respect the single-native-thread restriction described below.
 
-The built-in collector uses GC descriptors emitted by IL2LLVM and registers static fields as roots. It is not a replacement for the host allocator: `Marshal.AllocHGlobal` and `FreeHGlobal` import `malloc` and `free`, while new managed allocations are cleared through `Unsafe.InitBlock`. Block copies use `Unsafe.CopyBlock`; these methods import `memset` and `memcpy` respectively.
+The built-in collector uses GC descriptors emitted by MSIL2LLVM and registers static fields as roots. It is not a replacement for the host allocator: `Marshal.AllocHGlobal` and `FreeHGlobal` import `malloc` and `free`, while new managed allocations are cleared through `Unsafe.InitBlock`. Block copies use `Unsafe.CopyBlock`; these methods import `memset` and `memcpy` respectively.
 
 `System.Threading.Monitor.Enter` and `Exit` remain available so C# `lock` statements compile. On the single managed execution thread they only validate their arguments and maintain the `lockTaken` flag; they do not provide mutual exclusion or track lock ownership. Do not use them to synchronize native threads.
 
@@ -243,7 +243,7 @@ make
 ./ConsoleAppExample
 ```
 
-The Makefile links the existing object with `Runtime.c`. It does not build the managed project or run IL2LLVM.
+The Makefile links the existing object with `Runtime.c`. It does not build the managed project or run MSIL2LLVM.
 
 ## Linux kernel module
 
@@ -253,7 +253,7 @@ Generate the managed object using the `kernel` code model:
 
 ```powershell
 dotnet build LinuxKernelModuleExample\LinuxKernelModuleExample.csproj
-dotnet IL2LLVM\bin\Debug\net10.0\IL2LLVM.dll `
+dotnet MSIL2LLVM\bin\Debug\net10.0\MSIL2LLVM.dll `
   LinuxKernelModuleExample\bin\Debug\net10.0\LinuxKernelModuleExample.dll `
   LinuxKernelModuleExample\bin\Debug\net10.0\LinuxKernelModuleExample.obj `
   "x86_64-unknown-linux-gnu;kernel"
@@ -279,7 +279,7 @@ This example is not portable to another architecture without a matching native h
 The `Build ESP32S3Example(Xtensa)` launch profile emits
 `ESP32S3Example/ESP32S3Example.S`. Arduino can compile the assembly source when
 it is placed beside the sketch, without additional assembler flags.
-Other output paths continue to produce one relocatable object; IL2LLVM does not
+Other output paths continue to produce one relocatable object; MSIL2LLVM does not
 create archives.
 
 The bundled LLVM writes aligned constant-pool labels and `.long` values directly
@@ -330,9 +330,9 @@ designer for XSD completions.
 
 ## Scope and limitations
 
-- IL2LLVM translates methods with bodies in the input assembly. It does not link arbitrary .NET framework assemblies.
+- MSIL2LLVM translates methods with bodies in the input assembly. It does not link arbitrary .NET framework assemblies.
 - Unsupported IL or unresolved managed methods stop translation with an error; they are not silently replaced by runtime stubs.
 - Managed code runs on one native execution thread. Concurrent or asynchronously injected managed execution remains unsupported, including callbacks entered from native timer or worker threads.
 - There is no automatic executable or module linker step in the MSBuild targets. Object generation and native linking are separate steps.
 - Linux kernel code must not rely on the C standard library. The kernel example provides its own implementations for the external symbols it uses.
-- Native runtime code is target-specific by design; CoreLib and IL2LLVM do not select runtime layouts or exception buffers from the target triple.
+- Native runtime code is target-specific by design; CoreLib and MSIL2LLVM do not select runtime layouts or exception buffers from the target triple.
