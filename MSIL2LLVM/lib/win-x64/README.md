@@ -1,6 +1,6 @@
 # Custom libLLVM for Windows x64
 
-`libLLVM.dll` is built from the [`IL2LLVM-21.1.8` branch of
+`libLLVM.dll` is built from the [`MSIL2LLVM-21.1.8` branch of
 `nifanfa/llvm-project`](https://github.com/nifanfa/llvm-project) at commit
 `1a9515e3a898a661115547a8eacd1c571be4e5f6` with Microsoft Visual C++ in
 Release mode. The branch is based on upstream LLVM `llvmorg-21.1.8` (commit
